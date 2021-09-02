@@ -16,7 +16,7 @@ func main() {
 	}
 	log.Println(tree.IsNestedDir)
 
-	//// to test the io package
+	//// to try the reader package
 	//for _,path := range tree.FilePaths{
 	//	if strings.HasSuffix(path,"html") || strings.HasSuffix(path,"htm"){
 	//		err := reader.CloneFile(path, path+".bak")
