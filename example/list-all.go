@@ -2,21 +2,38 @@ package main
 
 import (
 	"github.com/watergist/file-engine/list"
-	"github.com/watergist/file-engine/reader"
 	"log"
 )
 
 func main() {
-	tree := list.Read([]string{"example", "list", "reader"})
-	tree.NestedDirAllowed = true
+	tree := list.Read(&[]string{"."}, 2)
+	//tree.SkipHiddenDirs = true
 	e := tree.UpdateFiles()
+	tree.UpdateStdinStatus()
+
 	if e != nil {
 		log.Fatal(e)
 	}
-	tree.CheckStdinStatus()
 	log.Println(tree.IsNestedDir)
 
-	//
-	log.Println(reader.CloneFile("go.mod", "bo.mod"))
-	log.Fatal(reader.CopyContent("go.mod", "LICENSE", ".gitignore", "bo.mod"))
+	//// to test the io package
+	//for _,path := range tree.FilePaths{
+	//	if strings.HasSuffix(path,"html") || strings.HasSuffix(path,"htm"){
+	//		err := reader.CloneFile(path, path+".bak")
+	//		if err != nil {
+	//			fmt.Println(err)
+	//			return
+	//		}
+	//		err = reader.CopyContent(path, "envoy/css.ht", path+".bak")
+	//		if err != nil {
+	//			fmt.Println(err)
+	//			return
+	//		}
+	//		err = os.Remove(path+".bak")
+	//		if err != nil {
+	//			fmt.Println(err)
+	//			return
+	//		}
+	//	}
+	//}
 }

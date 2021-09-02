@@ -6,7 +6,7 @@ import (
 
 //check if stdin is good input source
 
-func (tree *FileTree) CheckStdinStatus() {
+func (tree *FileTree) UpdateStdinStatus() {
 	// just try to access the stdin, no matter if its has something or not, it is always accessible.
 	// input to stdin gets into an ephemeral file, and we are fetching stats to that file
 	stdinFileInfo, err := os.Stdin.Stat()

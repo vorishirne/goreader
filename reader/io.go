@@ -21,12 +21,27 @@ func CopyContent(toPath string, fromPaths ...string) error {
 			return err
 		}
 		fileReader := bufio.NewReader(fileToRead)
+		ru, nRune, err := fileReader.ReadRune()
+		if err != nil || nRune < 1 {
+			return err
+		}
+		if ru != '\ufeff' {
+			err := fileReader.UnreadRune()
+			if err != nil {
+				return err
+			}
+		}
 
 		nBytes, err := fileReader.WriteTo(fileToWrite)
 		if err2 := fileToRead.Close(); err2 != nil {
 			return err2
 		}
 		if err != nil || nBytes < 1 {
+			return err
+		}
+
+		_, err = fileToWrite.WriteString("\n")
+		if err != nil {
 			return err
 		}
 	}
