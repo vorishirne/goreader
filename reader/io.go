@@ -2,10 +2,22 @@ package reader
 
 import (
 	"bufio"
+	"errors"
 	"os"
+	"path/filepath"
 )
 
 func CopyContent(toPath string, fromPaths ...string) error {
+	toDir := filepath.Dir(toPath)
+	if _, err := os.Stat(toDir); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(toDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+
 	fileToWrite, err := os.OpenFile(toPath,
 		os.O_APPEND|os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
