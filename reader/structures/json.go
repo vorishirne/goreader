@@ -7,14 +7,16 @@ import (
 )
 
 func LoadJsonFile(fileName string, data interface{}) interface{} {
-	fileText, err := os.ReadFile(fileName)
+	fileReader, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if data == nil {
-		data = map[string]interface{}{}
+		data = &(map[string]interface{}{})
 	}
-	err = json.Unmarshal(fileText, data)
+	decoder := json.NewDecoder(fileReader)
+	decoder.UseNumber()
+	err = decoder.Decode(data)
 	if err != nil {
 		log.Fatal(err)
 	}
