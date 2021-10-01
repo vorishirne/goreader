@@ -1,6 +1,10 @@
 package reader
 
-import "bufio"
+import (
+	"bufio"
+	"errors"
+	"os"
+)
 
 // there are already two functions that give control over length of data read
 // io.LimitReader() to limit max bytes of a reader. It will put reader's EOF near
@@ -16,4 +20,35 @@ import "bufio"
 func ReadSliceLimit(b *bufio.Reader, maxBytes int, delim byte) ([]byte, error) {
 	b = bufio.NewReaderSize(b, maxBytes)
 	return b.ReadSlice(delim)
+}
+
+// there needs to be a function that can call a callback on each line of a file,
+// + should also collect error responses for each line in a map.
+
+func CallbackOnEachLine(filePath string, callback func(string) error) (errMap *map[string]string, err error) {
+	errMap = &map[string]string{}
+	filePointer, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer filePointer.Close()
+	fileReader := bufio.NewReader(filePointer)
+	for {
+		line, err := fileReader.ReadBytes('\n')
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				err := callback(string(line))
+				if err != nil {
+					(*errMap)[string(line)] = err.Error()
+				}
+				break
+			}
+			return nil, err
+		}
+		err = callback(string(line))
+		if err != nil {
+			(*errMap)[string(line)] = err.Error()
+		}
+	}
+	return errMap, nil
 }
