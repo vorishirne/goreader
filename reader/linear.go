@@ -3,9 +3,13 @@ package reader
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 )
+
+var ErrorNoFileName = fmt.Errorf("no file to write")
 
 // there are already two functions that give control over length of data read
 // io.LimitReader() to limit max bytes of a reader. It will put reader's EOF near
@@ -52,4 +56,24 @@ func CallbackOnEachLine(filePath string, callback func(string) error) (errMap *m
 		}
 	}
 	return errMap, nil
+}
+
+func GetDirPathAndFileName(filePath string, isFilePathNonRoot bool) (dirPath string, fileName string, err error) {
+	if isFilePathNonRoot {
+		filePath = strings.Trim(filePath, "/")
+	} else if filePath != "/" {
+		filePath = strings.TrimSuffix(filePath, "/")
+	}
+	lastSlash := strings.LastIndexAny(filePath, "/")
+	fileName = filePath[lastSlash+1:]
+	if fileName == "" {
+		err = ErrorNoFileName
+	}
+	if lastSlash == -1 {
+		err = fmt.Errorf("no directory to write file to")
+		return
+	}
+	dirPath = dirPath[:lastSlash]
+
+	return
 }

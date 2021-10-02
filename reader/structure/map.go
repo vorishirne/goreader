@@ -1,4 +1,4 @@
-package structures
+package structure
 
 func SelectKey(arr *[]map[string]interface{}, key, value string) *map[string]interface{} {
 	for _, kv := range *arr {

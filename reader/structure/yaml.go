@@ -1,4 +1,4 @@
-package structures
+package structure
 
 import (
 	"gopkg.in/yaml.v2"
