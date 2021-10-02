@@ -73,7 +73,7 @@ func GetDirPathAndFileName(filePath string, isFilePathNonRoot bool) (dirPath str
 		err = fmt.Errorf("no directory to write file to")
 		return
 	}
-	dirPath = dirPath[:lastSlash]
+	dirPath = filePath[:lastSlash]
 
 	return
 }
