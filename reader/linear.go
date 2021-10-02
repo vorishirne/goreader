@@ -3,6 +3,7 @@ package reader
 import (
 	"bufio"
 	"errors"
+	"io"
 	"os"
 )
 
@@ -36,7 +37,7 @@ func CallbackOnEachLine(filePath string, callback func(string) error) (errMap *m
 	for {
 		line, err := fileReader.ReadBytes('\n')
 		if err != nil {
-			if errors.Is(err, os.ErrNotExist) {
+			if errors.Is(err, io.EOF) {
 				err := callback(string(line))
 				if err != nil {
 					(*errMap)[string(line)] = err.Error()
