@@ -10,6 +10,7 @@ import (
 )
 
 var ErrorNoFileName = fmt.Errorf("no file to write")
+var ErrorNoBasePath = fmt.Errorf("no directory to write file to")
 
 // there are already two functions that give control over length of data read
 // io.LimitReader() to limit max bytes of a reader. It will put reader's EOF near
@@ -70,10 +71,9 @@ func GetDirPathAndFileName(filePath string, isFilePathNonRoot bool) (dirPath str
 		err = ErrorNoFileName
 	}
 	if lastSlash == -1 {
-		err = fmt.Errorf("no directory to write file to")
-		return
+		err = ErrorNoBasePath
+	} else {
+		dirPath = filePath[:lastSlash]
 	}
-	dirPath = filePath[:lastSlash]
-
 	return
 }
