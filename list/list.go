@@ -10,13 +10,16 @@ import (
 func (tree *FileTree) UpdateFiles() error {
 	nestedLevel := 0
 	for _, inputPath := range *tree.InputPaths {
+
 		inputPath = strings.TrimSpace(inputPath)
 		file, err := os.Stat(inputPath)
 		if err != nil {
 			return err
 		}
 		path := filepath.Join(inputPath, file.Name())
-		if file.IsDir() && tree.MaxNestedDir != nestedLevel {
+		if file.IsDir() && tree.MaxNestedDir != nestedLevel &&
+			tree.IsDirAllowed(path) {
+
 			tree.IsDir = true
 			nestedLevel_ := nestedLevel + 1
 			// . actually means all the dirs and files in curr directory
@@ -30,8 +33,8 @@ func (tree *FileTree) UpdateFiles() error {
 			if err != nil {
 				return err
 			}
-		} else {
-			tree.IsFile = true
+		} else if tree.IsFileAllowed(path) {
+			tree.HasFile = true
 			if CheckPathHidden(path) {
 				tree.HiddenFilePaths = append(tree.HiddenFilePaths, path)
 			} else {
@@ -58,15 +61,17 @@ func (tree *FileTree) iterateDir(basePath *string, nestedLevel int) error {
 	}
 	for _, file := range ls {
 		path := filepath.Join(*basePath, file.Name())
-		if file.IsDir() && tree.MaxNestedDir != nestedLevel {
+		if file.IsDir() && tree.MaxNestedDir != nestedLevel &&
+			tree.IsDirAllowed(path) {
+
 			tree.IsNestedDir = true
 
 			err := tree.iterateDir(&path, nestedLevel+1)
 			if err != nil {
 				return err
 			}
-		} else {
-			tree.IsFile = true
+		} else if tree.IsFileAllowed(path) {
+			tree.HasFile = true
 
 			if CheckPathHidden(path) {
 				tree.HiddenFilePaths = append(tree.HiddenFilePaths, path)
