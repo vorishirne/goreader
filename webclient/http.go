@@ -15,7 +15,7 @@ func HTTPResponse(url string) (data *[]byte, err error) {
 		TLSHandshakeTimeout: 6 * time.Second,
 	}
 	var netClient = &http.Client{
-		Timeout:   time.Second * 6,
+		Timeout:   time.Second * 10,
 		Transport: netTransport,
 	}
 	response, _ := netClient.Get(url)
