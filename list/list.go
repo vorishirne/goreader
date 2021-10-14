@@ -3,12 +3,14 @@ package list
 import (
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
 
 func (tree *FileTree) UpdateFiles() error {
 	nestedLevel := 0
+	//nestedPathTree := &NestedPathTree{ }
 	for _, inputPath := range *tree.InputPaths {
 
 		inputPath = strings.TrimSpace(inputPath)
@@ -16,36 +18,41 @@ func (tree *FileTree) UpdateFiles() error {
 		if err != nil {
 			return err
 		}
-		path := filepath.Join(inputPath, file.Name())
 		if file.IsDir() && tree.MaxNestedDir != nestedLevel &&
-			tree.IsDirAllowed(path) {
-
+			tree.IsDirAllowed(inputPath) {
+			var nTree = tree.GeneratePathTree(inputPath)
+			if tree.GenerateNestedTree {
+				tree.NestedPathTree[inputPath] = nTree
+			}
 			tree.IsDir = true
 			nestedLevel_ := nestedLevel + 1
 			// . actually means all the dirs and files in curr directory
 			// not the name of a dir.
 			// it's just a shorthand. iterateDir will just expand this shorthand,
 			// and must not be treated as one nested level of dir
-			if path == "." || path == "./" {
+			if inputPath == "." || inputPath == "./" {
 				nestedLevel_ = nestedLevel
 			}
-			err = tree.iterateDir(&inputPath, nestedLevel_)
+			err = tree.iterateDir(&inputPath, nestedLevel_, nTree)
 			if err != nil {
 				return err
 			}
-		} else if tree.IsFileAllowed(path) {
+		} else if tree.IsFileAllowed(inputPath) {
+			if tree.GenerateNestedTree {
+				tree.NestedPathTree[inputPath] = nil
+			}
 			tree.HasFile = true
-			if CheckPathHidden(path) {
-				tree.HiddenFilePaths = append(tree.HiddenFilePaths, path)
+			if CheckPathHidden(inputPath) {
+				tree.HiddenFilePaths = append(tree.HiddenFilePaths, inputPath)
 			} else {
-				tree.FilePaths = append(tree.FilePaths, path)
+				tree.FilePaths = append(tree.FilePaths, inputPath)
 			}
 		}
 	}
 	return nil
 }
 
-func (tree *FileTree) iterateDir(basePath *string, nestedLevel int) error {
+func (tree *FileTree) iterateDir(basePath *string, nestedLevel int, nTree *NestedPathTree) error {
 
 	if CheckPathHidden(*basePath) {
 		if tree.SkipHiddenDirs {
@@ -60,19 +67,20 @@ func (tree *FileTree) iterateDir(basePath *string, nestedLevel int) error {
 		return err
 	}
 	for _, file := range ls {
+
 		path := filepath.Join(*basePath, file.Name())
 		if file.IsDir() && tree.MaxNestedDir != nestedLevel &&
 			tree.IsDirAllowed(path) {
-
+			tree.AddDirToPathTree(nTree, file.Name(), *basePath)
 			tree.IsNestedDir = true
 
-			err := tree.iterateDir(&path, nestedLevel+1)
+			err := tree.iterateDir(&path, nestedLevel+1, nTree.NestedDir[file.Name()])
 			if err != nil {
 				return err
 			}
 		} else if tree.IsFileAllowed(path) {
 			tree.HasFile = true
-
+			tree.AddFileToPathTree(nTree, file.Name(), *basePath)
 			if CheckPathHidden(path) {
 				tree.HiddenFilePaths = append(tree.HiddenFilePaths, path)
 			} else {
@@ -98,4 +106,34 @@ func CheckPathHidden(path string) bool {
 		return true
 	}
 	return false
+}
+
+func (tree *FileTree) AddDirToPathTree(nTree *NestedPathTree, dir string, basePath string) {
+	if tree.GenerateNestedTree {
+		npt := &NestedPathTree{
+			FullPathTillNow: path.Join(basePath, dir),
+			IsHiddenDir:     CheckPathHidden(path.Join(basePath, dir)),
+			NestedDir:       make(map[string]*NestedPathTree),
+		}
+		nTree.NestedDir[dir] = npt
+		if tree.GenerateNestedTreeFileOrder {
+			nTree.FileOrder = append(nTree.FileOrder, fileOrder{npt.FullPathTillNow, npt})
+		}
+	}
+}
+
+func (tree *FileTree) AddFileToPathTree(nTree *NestedPathTree, file string, basePath string) {
+	if tree.GenerateNestedTree {
+		nTree.FilesHere = append(nTree.FilesHere, path.Join(basePath, file))
+		if tree.GenerateNestedTreeFileOrder {
+			nTree.FileOrder = append(nTree.FileOrder, fileOrder{path.Join(basePath, file), nil})
+		}
+	}
+}
+
+func (tree *FileTree) GeneratePathTree(basePath string) *NestedPathTree {
+	return &NestedPathTree{
+		FullPathTillNow: basePath,
+		IsHiddenDir:     CheckPathHidden(basePath),
+		NestedDir:       make(map[string]*NestedPathTree)}
 }

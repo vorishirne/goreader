@@ -6,7 +6,8 @@ import (
 )
 
 func main() {
-	tree := list.Read(&[]string{"."}, 2)
+	tree := list.Read(&[]string{"../goreader/blog"}, 2)
+	tree.GenerateNestedTree = true
 	//tree.SkipHiddenDirs = true
 	e := tree.UpdateFiles()
 	tree.UpdateStdinStatus()
