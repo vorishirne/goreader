@@ -27,6 +27,9 @@ func CopyContent(toPath string, fromPaths ...string) error {
 	defer fileToWrite.Close()
 
 	for _, v := range fromPaths {
+		if v == "" {
+			continue
+		}
 		fileToRead, err := os.Open(v)
 		if err != nil {
 			_ = fileToRead.Close()
