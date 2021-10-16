@@ -13,10 +13,10 @@ else,
 	an a map is created and sent
 */
 
-func LoadJsonFile(fileName string, data interface{}) interface{} {
+func LoadJsonFile(fileName string, data interface{}) (err error, inter interface{}) {
 	fileReader, err := os.Open(fileName)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 	var dataWasNil bool
 	if data == nil {
@@ -28,12 +28,12 @@ func LoadJsonFile(fileName string, data interface{}) interface{} {
 	decoder.UseNumber()
 	err = decoder.Decode(data)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 	if dataWasNil {
-		return data
+		return nil, data
 	}
-	return nil
+	return nil, nil
 }
 
 func WriteJson(fileName string, data interface{}) {
