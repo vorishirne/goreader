@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/watergist/file-engine/list"
+	"github.com/vorishirne/goreader/list"
 	"log"
 )
 

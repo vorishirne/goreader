@@ -1,4 +1,4 @@
-module github.com/watergist/file-engine
+module github.com/vorishirne/goreader
 
 go 1.16
 

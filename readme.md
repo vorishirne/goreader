@@ -1,25 +1,32 @@
-# file-engine
-module to deal with large or more files. 
-#### side-note: this module will not require frequent maintenance as it is quite close to the golang std library.
+# goreader
+A utility library to do files/io/bytes processing/parsing in file-system or network. 
 
-file engine has two utilities:
-    
-1. list: takes away the headache of 
-    dealing with directories and files, hidden ones, nested ones.
-       
-    It's kind of "ls" command as a package, but doesn't intends
-    to show file properties, permissions or ownership.
-       
-    General packages just take care of reading and accessing
-    files instead of dealing with file permissions.
+1. These features are really common to be implemented for a non-server/local-running application. Though looking fairly easy, almost all had edge cases to be taken care of minutely.
+2. To use a library package instead of custom segments saves redundant testing/debugging.
 
-
-2. reader: binds frequently used file io functions 
-
-    for ex. cloning a file, add to front of a file(reverse append), etc.
-
-    These functions are frequent to use, but not provided by standard go io package.
-
+# Feature list 
+* generate parse tree for given paths
+  * list out files/folders separately
+  * Get hidden files/folders separately
+  * Preserve nested order for dir and files
+  * Control recursion level
+  * Pass custom functions to filter out files and dirs
+  * Include StdIn if valid
+* Encodings
+  * json to 
+    * file
+    * yaml
+  * yaml to
+    * json
+    * file
+  * file to
+    * json 
+    * yaml
+* IO ops
+  * copy multi files to single one
+  * clone file
+  * Pass a callback to be executed over each line of a file
+  * bash `dirname` & `basedir` function
 # How to use
 
 #### use lister
